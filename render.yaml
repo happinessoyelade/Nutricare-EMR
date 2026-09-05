@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: nutricare-emr-paystack
+    env: docker
+    repo: https://github.com/happinessoyelade/NutriCare-EMR
+    branch: main
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    plan: starter
+    region: ohio
