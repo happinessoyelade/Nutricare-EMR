@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriCare EMR - Electronic Medical Record System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: flex;
+            min-height: 600px;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-menu button {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            background: #e0e0e0;
+            color: #333;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .sidebar-menu button.active {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95em;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button.btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        button.btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        button.btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button.btn-secondary {
+            background: #6c757d;
+            color: white;
+            margin-left: 10px;
+        }
+
+        button.btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        button.btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            font-size: 0.85em;
+        }
+
+        button.btn-danger:hover {
+            background: #c82333;
+        }
+
+        .patient-list, .record-list, .nutrition-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+        }
+
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .card .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: space-between;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state p {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box h4 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-box p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+        }
+
+        .close-btn {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+                display: flex;
+                overflow-x: auto;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                gap: 10px;
+            }
+
+            .sidebar-menu li {
+                flex-shrink: 0;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .patient-list, .record-list, .nutrition-list {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 NutriCare EMR</h1>
+            <p>Electronic Medical Record System for Dietitians and Nutritionists</p>
+        </header>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <ul class="sidebar-menu">
+                    <li><button class="menu-btn active" data-section="dashboard">📊 Dashboard</button></li>
+                    <li><button class="menu-btn" data-section="patients">👥 Patients</button></li>
+                    <li><button class="menu-btn" data-section="nutrition">🍎 Nutrition Plans</button></li>
+                    <li><button class="menu-btn" data-section="records">📋 Medical Records</button></li>
+                    <li><button class="menu-btn" data-section="settings">⚙️ Settings</button></li>
+                </ul>
+            </div>
+
+            <div class="content">
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="section active">
+                    <h2>Dashboard</h2>
+                    <div id="dashboard-stats" class="stats-grid"></div>
+                    <div id="dashboard-message"></div>
+                </div>
+
+                <!-- Patients Section -->
+                <div id="patients" class="section">
+                    <h2>Patient Management</h2>
+                    <button class="btn btn-primary" onclick="openAddPatientForm()">+ Add New Patient</button>
+                    <div id="patient-list" class="patient-list" style="margin-top: 20px;"></div>
+                </div>
+
+                <!-- Nutrition Plans Section -->
+                <div id="nutrition" class="section">
+                    <h2>Nutrition Plans</h2>
+                    <button class="btn btn-primary" onclick="openAddNutritionForm()">+ Create Nutrition Plan</button>
+                    <div id="nutrition-list" class="nutrition-list" style="margin-top: 20px;"></div>
+                </div>
+
+                <!-- Medical Records Section -->
+                <div id="records" class="section">
+                    <h2>Medical Records</h2>
+                    <button class="btn btn-primary" onclick="openAddRecordForm()">+ Add Medical Record</button>
+                    <div id="record-list" class="record-list" style="margin-top: 20px;"></div>
+                </div>
+
+                <!-- Settings Section -->
+                <div id="settings" class="section">
+                    <h2>Settings & Data Management</h2>
+                    <div class="info-box">
+                        <p><strong>Data Storage:</strong> All data is stored locally in your browser. No internet connection needed after first load.</p>
+                    </div>
+                    
+                    <h3 style="color: #667eea; margin-top: 30px; margin-bottom: 20px;">Data Management</h3>
+                    <div class="form-group">
+                        <button class="btn btn-primary" onclick="exportData()">📥 Export Data (Backup)</button>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 10px;">Download all your data as JSON file for backup.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <button class="btn btn-secondary" onclick="importData()">📤 Import Data (Restore)</button>
+                        <input type="file" id="import-file" accept=".json" style="display: none;">
+                        <p style="font-size: 0.9em; color: #666; margin-top: 10px;">Restore data from a previously exported JSON file.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <button class="btn btn-danger" onclick="clearAllData()">🗑️ Clear All Data</button>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 10px;">⚠️ This will delete all records. This action cannot be undone.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Patient Modal -->
+    <div id="patient-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('patient-modal')">&times;</button>
+            <h2>Add/Edit Patient</h2>
+            <form id="patient-form" onsubmit="savePatient(event)">
+                <input type="hidden" id="patient-id">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="patient-name" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Age *</label>
+                        <input type="number" id="patient-age" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <select id="patient-gender">
+                            <option value="">Select...</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Contact Number</label>
+                    <input type="tel" id="patient-phone">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="patient-email">
+                </div>
+                <div class="form-group">
+                    <label>Medical Conditions</label>
+                    <textarea id="patient-conditions" placeholder="e.g., Diabetes, Hypertension, etc."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Allergies</label>
+                    <textarea id="patient-allergies" placeholder="List any food or medication allergies"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Patient</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('patient-modal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Nutrition Plan Modal -->
+    <div id="nutrition-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('nutrition-modal')">&times;</button>
+            <h2>Create Nutrition Plan</h2>
+            <form id="nutrition-form" onsubmit="saveNutrition(event)">
+                <input type="hidden" id="nutrition-id">
+                <div class="form-group">
+                    <label>Select Patient *</label>
+                    <select id="nutrition-patient" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Plan Name *</label>
+                    <input type="text" id="nutrition-name" placeholder="e.g., Diabetic Diet Plan" required>
+                </div>
+                <div class="form-group">
+                    <label>Duration (days)</label>
+                    <input type="number" id="nutrition-duration" value="30">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Daily Calorie Target</label>
+                        <input type="number" id="nutrition-calories">
+                    </div>
+                    <div class="form-group">
+                        <label>Protein (g)</label>
+                        <input type="number" id="nutrition-protein">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Carbs (g)</label>
+                        <input type="number" id="nutrition-carbs">
+                    </div>
+                    <div class="form-group">
+                        <label>Fat (g)</label>
+                        <input type="number" id="nutrition-fat">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Dietary Restrictions</label>
+                    <textarea id="nutrition-restrictions" placeholder="e.g., No sugar, Low sodium, etc."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Recommended Foods</label>
+                    <textarea id="nutrition-foods" placeholder="List recommended foods and meals"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Plan</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('nutrition-modal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Medical Record Modal -->
+    <div id="record-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('record-modal')">&times;</button>
+            <h2>Add Medical Record</h2>
+            <form id="record-form" onsubmit="saveMedicalRecord(event)">
+                <input type="hidden" id="record-id">
+                <div class="form-group">
+                    <label>Select Patient *</label>
+                    <select id="record-patient" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Record Type *</label>
+                    <select id="record-type" required>
+                        <option value="">Select...</option>
+                        <option value="Lab Test">Lab Test</option>
+                        <option value="Vital Signs">Vital Signs</option>
+                        <option value="Consultation">Consultation</option>
+                        <option value="Prescription">Prescription</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" id="record-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Description/Findings *</label>
+                    <textarea id="record-description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Recommendations</label>
+                    <textarea id="record-recommendations"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Record</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('record-modal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Data Storage
+        const DB_KEYS = {
+            PATIENTS: 'nutricare_patients',
+            NUTRITION: 'nutricare_nutrition',
+            RECORDS: 'nutricare_records'
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            setupMenuListeners();
+            loadDashboard();
+        });
+
+        // Menu Navigation
+        function setupMenuListeners() {
+            document.querySelectorAll('.menu-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const section = this.getAttribute('data-section');
+                    navigateToSection(section);
+                });
+            });
+        }
+
+        function navigateToSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+
+            // Show selected section
+            document.getElementById(section).classList.add('active');
+            event.target.classList.add('active');
+
+            // Load section data
+            if (section === 'patients') loadPatients();
+            else if (section === 'nutrition') loadNutritionPlans();
+            else if (section === 'records') loadMedicalRecords();
+            else if (section === 'dashboard') loadDashboard();
+        }
+
+        // Dashboard Functions
+        function loadDashboard() {
+            const patients = getAllPatients();
+            const nutrition = getAllNutrition();
+            const records = getAllRecords();
+
+            const statsHtml = `
+                <div class="stat-box">
+                    <h4>${patients.length}</h4>
+                    <p>Total Patients</p>
+                </div>
+                <div class="stat-box">
+                    <h4>${nutrition.length}</h4>
+                    <p>Nutrition Plans</p>
+                </div>
+                <div class="stat-box">
+                    <h4>${records.length}</h4>
+                    <p>Medical Records</p>
+                </div>
+                <div class="stat-box">
+                    <h4>${new Date().toLocaleDateString()}</h4>
+                    <p>Today's Date</p>
+                </div>
+            `;
+
+            document.getElementById('dashboard-stats').innerHTML = statsHtml;
+
+            let messageHtml = '<div class="info-box">';
+            if (patients.length === 0) {
+                messageHtml += '<p>👋 Welcome! Start by adding your first patient.</p>';
+            } else {
+                messageHtml += `<p>✅ System is running smoothly with ${patients.length} patient(s), ${nutrition.length} nutrition plan(s), and ${records.length} record(s).</p>`;
+            }
+            messageHtml += '</div>';
+
+            document.getElementById('dashboard-message').innerHTML = messageHtml;
+        }
+
+        // Patient Management
+        function getAllPatients() {
+            return JSON.parse(localStorage.getItem(DB_KEYS.PATIENTS) || '[]');
+        }
+
+        function savePatientToStorage(patient) {
+            const patients = getAllPatients();
+            if (patient.id) {
+                const index = patients.findIndex(p => p.id === patient.id);
+                if (index !== -1) patients[index] = patient;
+            } else {
+                patient.id = Date.now().toString();
+                patient.createdAt = new Date().toISOString();
+                patients.push(patient);
+            }
+            localStorage.setItem(DB_KEYS.PATIENTS, JSON.stringify(patients));
+            showAlert('Patient saved successfully!', 'success');
+        }
+
+        function deletePatient(id) {
+            if (confirm('Are you sure you want to delete this patient? This will also remove associated records.')) {
+                let patients = getAllPatients();
+                patients = patients.filter(p => p.id !== id);
+                localStorage.setItem(DB_KEYS.PATIENTS, JSON.stringify(patients));
+
+                // Also remove related nutrition plans and records
+                let nutrition = getAllNutrition();
+                nutrition = nutrition.filter(n => n.patientId !== id);
+                localStorage.setItem(DB_KEYS.NUTRITION, JSON.stringify(nutrition));
+
+                let records = getAllRecords();
+                records = records.filter(r => r.patientId !== id);
+                localStorage.setItem(DB_KEYS.RECORDS, JSON.stringify(records));
+
+                showAlert('Patient and related records deleted!', 'success');
+                loadPatients();
+            }
+        }
+
+        function loadPatients() {
+            const patients = getAllPatients();
+            const patientList = document.getElementById('patient-list');
+
+            if (patients.length === 0) {
+                patientList.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><p>No patients added yet. Click "Add New Patient" to get started.</p></div>';
+                return;
+            }
+
+            patientList.innerHTML = patients.map(patient => `
+                <div class="card">
+                    <h3>${patient.name}</h3>
+                    <p><strong>Age:</strong> ${patient.age} years</p>
+                    <p><strong>Gender:</strong> ${patient.gender || 'N/A'}</p>
+                    <p><strong>Contact:</strong> ${patient.phone || 'N/A'}</p>
+                    <p><strong>Email:</strong> ${patient.email || 'N/A'}</p>
+                    ${patient.conditions ? `<p><strong>Conditions:</strong> ${patient.conditions}</p>` : ''}
+                    <div class="actions">
+                        <button class="btn btn-primary" onclick="editPatient('${patient.id}')">Edit</button>
+                        <button class="btn btn-danger" onclick="deletePatient('${patient.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openAddPatientForm() {
+            document.getElementById('patient-id').value = '';
+            document.getElementById('patient-form').reset();
+            document.getElementById('patient-modal').classList.add('active');
+        }
+
+        function editPatient(id) {
+            const patients = getAllPatients();
+            const patient = patients.find(p => p.id === id);
+            if (patient) {
+                document.getElementById('patient-id').value = patient.id;
+                document.getElementById('patient-name').value = patient.name;
+                document.getElementById('patient-age').value = patient.age;
+                document.getElementById('patient-gender').value = patient.gender || '';
+                document.getElementById('patient-phone').value = patient.phone || '';
+                document.getElementById('patient-email').value = patient.email || '';
+                document.getElementById('patient-conditions').value = patient.conditions || '';
+                document.getElementById('patient-allergies').value = patient.allergies || '';
+                document.getElementById('patient-modal').classList.add('active');
+            }
+        }
+
+        function savePatient(event) {
+            event.preventDefault();
+            const patient = {
+                id: document.getElementById('patient-id').value,
+                name: document.getElementById('patient-name').value,
+                age: document.getElementById('patient-age').value,
+                gender: document.getElementById('patient-gender').value,
+                phone: document.getElementById('patient-phone').value,
+                email: document.getElementById('patient-email').value,
+                conditions: document.getElementById('patient-conditions').value,
+                allergies: document.getElementById('patient-allergies').value
+            };
+            savePatientToStorage(patient);
+            closeModal('patient-modal');
+            loadPatients();
+        }
+
+        // Nutrition Plans
+        function getAllNutrition() {
+            return JSON.parse(localStorage.getItem(DB_KEYS.NUTRITION) || '[]');
+        }
+
+        function saveNutritionToStorage(nutrition) {
+            const plans = getAllNutrition();
+            if (nutrition.id) {
+                const index = plans.findIndex(p => p.id === nutrition.id);
+                if (index !== -1) plans[index] = nutrition;
+            } else {
+                nutrition.id = Date.now().toString();
+                nutrition.createdAt = new Date().toISOString();
+                plans.push(nutrition);
+            }
+            localStorage.setItem(DB_KEYS.NUTRITION, JSON.stringify(plans));
+            showAlert('Nutrition plan saved successfully!', 'success');
+        }
+
+        function deleteNutrition(id) {
+            if (confirm('Delete this nutrition plan?')) {
+                let plans = getAllNutrition();
+                plans = plans.filter(p => p.id !== id);
+                localStorage.setItem(DB_KEYS.NUTRITION, JSON.stringify(plans));
+                showAlert('Nutrition plan deleted!', 'success');
+                loadNutritionPlans();
+            }
+        }
+
+        function loadNutritionPlans() {
+            const plans = getAllNutrition();
+            const patients = getAllPatients();
+            const nutritionList = document.getElementById('nutrition-list');
+
+            if (plans.length === 0) {
+                nutritionList.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><p>No nutrition plans created yet.</p></div>';
+                return;
+            }
+
+            nutritionList.innerHTML = plans.map(plan => {
+                const patient = patients.find(p => p.id === plan.patientId);
+                return `
+                    <div class="card">
+                        <h3>${plan.name}</h3>
+                        <p><strong>Patient:</strong> ${patient ? patient.name : 'Unknown'}</p>
+                        <p><strong>Duration:</strong> ${plan.duration} days</p>
+                        <p><strong>Calories:</strong> ${plan.calories || 'N/A'} kcal/day</p>
+                        <p><strong>Protein:</strong> ${plan.protein || 'N/A'}g | <strong>Carbs:</strong> ${plan.carbs || 'N/A'}g | <strong>Fat:</strong> ${plan.fat || 'N/A'}g</p>
+                        ${plan.restrictions ? `<p><strong>Restrictions:</strong> ${plan.restrictions}</p>` : ''}
+                        <div class="actions">
+                            <button class="btn btn-primary" onclick="editNutrition('${plan.id}')">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteNutrition('${plan.id}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openAddNutritionForm() {
+            populatePatientSelects();
+            document.getElementById('nutrition-id').value = '';
+            document.getElementById('nutrition-form').reset();
+            document.getElementById('nutrition-modal').classList.add('active');
+        }
+
+        function editNutrition(id) {
+            populatePatientSelects();
+            const plans = getAllNutrition();
+            const plan = plans.find(p => p.id === id);
+            if (plan) {
+                document.getElementById('nutrition-id').value = plan.id;
+                document.getElementById('nutrition-patient').value = plan.patientId;
+                document.getElementById('nutrition-name').value = plan.name;
+                document.getElementById('nutrition-duration').value = plan.duration;
+                document.getElementById('nutrition-calories').value = plan.calories || '';
+                document.getElementById('nutrition-protein').value = plan.protein || '';
+                document.getElementById('nutrition-carbs').value = plan.carbs || '';
+                document.getElementById('nutrition-fat').value = plan.fat || '';
+                document.getElementById('nutrition-restrictions').value = plan.restrictions || '';
+                document.getElementById('nutrition-foods').value = plan.foods || '';
+                document.getElementById('nutrition-modal').classList.add('active');
+            }
+        }
+
+        function saveNutrition(event) {
+            event.preventDefault();
+            const nutrition = {
+                id: document.getElementById('nutrition-id').value,
+                patientId: document.getElementById('nutrition-patient').value,
+                name: document.getElementById('nutrition-name').value,
+                duration: document.getElementById('nutrition-duration').value,
+                calories: document.getElementById('nutrition-calories').value,
+                protein: document.getElementById('nutrition-protein').value,
+                carbs: document.getElementById('nutrition-carbs').value,
+                fat: document.getElementById('nutrition-fat').value,
+                restrictions: document.getElementById('nutrition-restrictions').value,
+                foods: document.getElementById('nutrition-foods').value
+            };
+            saveNutritionToStorage(nutrition);
+            closeModal('nutrition-modal');
+            loadNutritionPlans();
+        }
+
+        // Medical Records
+        function getAllRecords() {
+            return JSON.parse(localStorage.getItem(DB_KEYS.RECORDS) || '[]');
+        }
+
+        function saveMedicalRecordToStorage(record) {
+            const records = getAllRecords();
+            if (record.id) {
+                const index = records.findIndex(r => r.id === record.id);
+                if (index !== -1) records[index] = record;
+            } else {
+                record.id = Date.now().toString();
+                record.createdAt = new Date().toISOString();
+                records.push(record);
+            }
+            localStorage.setItem(DB_KEYS.RECORDS, JSON.stringify(records));
+            showAlert('Medical record saved successfully!', 'success');
+        }
+
+        function deleteRecord(id) {
+            if (confirm('Delete this medical record?')) {
+                let records = getAllRecords();
+                records = records.filter(r => r.id !== id);
+                localStorage.setItem(DB_KEYS.RECORDS, JSON.stringify(records));
+                showAlert('Medical record deleted!', 'success');
+                loadMedicalRecords();
+            }
+        }
+
+        function loadMedicalRecords() {
+            const records = getAllRecords();
+            const patients = getAllPatients();
+            const recordList = document.getElementById('record-list');
+
+            if (records.length === 0) {
+                recordList.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><p>No medical records added yet.</p></div>';
+                return;
+            }
+
+            recordList.innerHTML = records.map(record => {
+                const patient = patients.find(p => p.id === record.patientId);
+                return `
+                    <div class="card">
+                        <h3>${record.type}</h3>
+                        <p><strong>Patient:</strong> ${patient ? patient.name : 'Unknown'}</p>
+                        <p><strong>Date:</strong> ${new Date(record.date).toLocaleDateString()}</p>
+                        <p><strong>Description:</strong> ${record.description}</p>
+                        ${record.recommendations ? `<p><strong>Recommendations:</strong> ${record.recommendations}</p>` : ''}
+                        <div class="actions">
+                            <button class="btn btn-primary" onclick="editRecord('${record.id}')">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteRecord('${record.id}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openAddRecordForm() {
+            populatePatientSelects();
+            document.getElementById('record-id').value = '';
+            document.getElementById('record-form').reset();
+            document.getElementById('record-date').valueAsDate = new Date();
+            document.getElementById('record-modal').classList.add('active');
+        }
+
+        function editRecord(id) {
+            populatePatientSelects();
+            const records = getAllRecords();
+            const record = records.find(r => r.id === id);
+            if (record) {
+                document.getElementById('record-id').value = record.id;
+                document.getElementById('record-patient').value = record.patientId;
+                document.getElementById('record-type').value = record.type;
+                document.getElementById('record-date').value = record.date;
+                document.getElementById('record-description').value = record.description;
+                document.getElementById('record-recommendations').value = record.recommendations || '';
+                document.getElementById('record-modal').classList.add('active');
+            }
+        }
+
+        function saveMedicalRecord(event) {
+            event.preventDefault();
+            const record = {
+                id: document.getElementById('record-id').value,
+                patientId: document.getElementById('record-patient').value,
+                type: document.getElementById('record-type').value,
+                date: document.getElementById('record-date').value,
+                description: document.getElementById('record-description').value,
+                recommendations: document.getElementById('record-recommendations').value
+            };
+            saveMedicalRecordToStorage(record);
+            closeModal('record-modal');
+            loadMedicalRecords();
+        }
+
+        // Utility Functions
+        function populatePatientSelects() {
+            const patients = getAllPatients();
+            const options = patients.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            
+            document.getElementById('nutrition-patient').innerHTML = '<option value="">Select Patient...</option>' + options;
+            document.getElementById('record-patient').innerHTML = '<option value="">Select Patient...</option>' + options;
+
+            if (options === '') {
+                showAlert('⚠️ Please add a patient first before creating plans or records.', 'info');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            document.querySelector('.content').insertBefore(alertDiv, document.querySelector('.content').firstChild);
+            setTimeout(() => alertDiv.remove(), 4000);
+        }
+
+        // Data Export/Import
+        function exportData() {
+            const data = {
+                patients: getAllPatients(),
+                nutrition: getAllNutrition(),
+                records: getAllRecords(),
+                exportDate: new Date().toISOString()
+            };
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `nutricare-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            showAlert('Data exported successfully!', 'success');
+        }
+
+        function importData() {
+            document.getElementById('import-file').click();
+            document.getElementById('import-file').onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        if (data.patients) localStorage.setItem(DB_KEYS.PATIENTS, JSON.stringify(data.patients));
+                        if (data.nutrition) localStorage.setItem(DB_KEYS.NUTRITION, JSON.stringify(data.nutrition));
+                        if (data.records) localStorage.setItem(DB_KEYS.RECORDS, JSON.stringify(data.records));
+                        showAlert('Data imported successfully!', 'success');
+                        loadDashboard();
+                    } catch (error) {
+                        showAlert('Error importing data. Please check the file format.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ This will delete ALL data permanently. Are you sure?')) {
+                if (confirm('Really? This cannot be undone!')) {
+                    localStorage.removeItem(DB_KEYS.PATIENTS);
+                    localStorage.removeItem(DB_KEYS.NUTRITION);
+                    localStorage.removeItem(DB_KEYS.RECORDS);
+                    showAlert('All data cleared!', 'success');
+                    loadDashboard();
+                }
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
